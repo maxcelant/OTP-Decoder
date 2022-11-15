@@ -12,6 +12,9 @@ msgs = [ "It was the best of times it was the worst of times it was th",
          "for evil in the superlative degree of comparison only The op",
          "ening paragraph from A Tale Of Two Cities by Charles Dickens" ]
 
+# msgs = [ "It was the best of times it was the worst of times it was th",
+#          "e age of wisdom it was the age of foolishness it was the epo",]
+
 def encrypt(pad, msg):
     return bytes([x ^ ord(y) for (x, y) in zip(pad, msg)]).hex()
 
