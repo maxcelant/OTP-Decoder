@@ -1,4 +1,3 @@
-from time import sleep
 from typing import List
 
 class Application:
@@ -10,6 +9,10 @@ class Application:
         self.ciphertexts = self.import_ciphertext(file)
         self.key = ['' for _ in range(len(self.ciphertexts[0]) // 2)]
         self.plaintexts = [['_' for _ in range(len(self.ciphertexts[0]) // 2)] for _ in range(len(self.ciphertexts))]
+
+    # Runs the functions that decipher the given text
+    # And then display the finished product in the terminal
+    def run(self):
         self.compare()
         self.decode_text()
         self.print()
@@ -31,15 +34,19 @@ class Application:
         return temp
                     
     
+    # Compare the ciphertexts to try to find whitespaces
+    # If we find a whitespace, we find the key for that column
     def compare(self):
-        c = []
+        c = [] # temp variable
         
-        # turns our 
+        # turns our cipher string into blocks of 1 hexadecimal
         for text in self.ciphertexts:
             c.append([text[i] + text[i+1] for i in range(0, len(text), 2)])
         
+        # Compares each row with other rows
         for i in range(len(c)):
             j = k = 0
+            # Compare the j-th column of the [i] and [k] rows
             while j < len(c[0]):
                 c1 = c[i][j]
                 
@@ -48,6 +55,7 @@ class Application:
                     k += 1
                 
                 c2 = c[k][j]
+                # Result will return an integer value
                 res = self.calculate_XOR(c1, c2)
                 # If the result is not a whitespace, skip it
                 if res < 65 and res > 0:
@@ -57,7 +65,7 @@ class Application:
                 else:
                     k += 1
                 
-                # Key is found for this column, continue column index and reset row index
+                # Key is found for this column, continue column index [j] and reset row index [k]
                 if k == len(c):
                     self.calculate_key(c1, j)
                     j += 1   
@@ -66,30 +74,37 @@ class Application:
     
     # Perform XOR and returns the decimal ASCII value 
     def calculate_XOR(self, c1, c2):      
-        c1, c2 = chr(int(c1, 16)), chr(int(c2, 16))
-        res = ord(c1) ^ ord(c2)
+        c1, c2 = chr(int(c1, 16)), chr(int(c2, 16)) # get the ASCII value for c1 and c2
+        res = ord(c1) ^ ord(c2)                     # return the result of c1 XOR c2
         return res
     
     
     # Calculates the key of the i-th column
     def calculate_key(self, c, i):
-        if self.key[i] == '':
+        if not self.key[i]:
+            # K[i] = (32 XOR c)
             self.key[i] = ord(' ') ^ ord(chr(int(c, 16)))
             
     
+    # Creates the decoded plaintext from the given key
     def decode_text(self):
         for i, text in enumerate(self.ciphertexts):
+            # Turns our cipher string into blocks of 1 hexadecimal 
             text = [text[i] + text[i+1] for i in range(0, len(text), 2)]
             for j in range(len(text)):
+                # If the key at the j-th position exists...
                 if self.key[j] != '':
                     self.plaintexts[i][j] = self.get_letter(self.key[j], text[j])
                     
 
+    # Returns the ASCII character from the (k XOR c)
     def get_letter(self, key, cipher_letter):
+        # Perform (k XOR c)
         plaintext_letter = key ^ ord(chr(int(cipher_letter, 16)))
         return chr(plaintext_letter)
     
     
+    # Prints out the (mostly) legible plaintext
     def print(self):
         for text in self.plaintexts:
             print("".join(text))
